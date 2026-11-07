@@ -1,20 +1,17 @@
-/** Tests last-write-wins merge of local vs remote tasks. */
+/** Tests last-write-wins merge rules for tasks and blocked periods. */
 package org.ashoreprospect.db;
 
-import org.ashoreprospect.BlockedTime;
-import org.ashoreprospect.Task;
-import org.ashoreprospect.Workflow;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.ashoreprospect.BlockedTime;
+import org.ashoreprospect.Task;
+import org.ashoreprospect.Workflow;
+import org.junit.jupiter.api.Test;
 
 class TaskRepositoryMergeTest {
 
@@ -124,10 +121,12 @@ class TaskRepositoryMergeTest {
     void bothNull_keepsLocalOnClientAndHost() {
         assertFalse(TaskRepository.preferRemote(null, null, false));
         assertFalse(TaskRepository.preferRemote(null, null, true));
+
         BlockedTime local = blocked("local", TIE);
         BlockedTime remote = blocked("remote", TIE);
         local.setLastUpdatedAt(null);
         remote.setLastUpdatedAt(null);
+
         assertSame(local, TaskRepository.mergeBlocked(local, remote, false));
         assertSame(local, TaskRepository.mergeBlocked(local, remote, true));
     }

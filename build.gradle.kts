@@ -4,6 +4,7 @@ import java.util.zip.ZipFile
 
 plugins {
     id("application")
+    id("jacoco")
     id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
@@ -32,8 +33,24 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-tasks.test {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    maxParallelForks = Runtime.getRuntime().availableProcessors().coerceAtMost(2).coerceAtLeast(1)
+    failFast = false
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
 }
 
 application {
